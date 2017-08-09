@@ -1,20 +1,33 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Home page</title>
+
+	<!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="css/home.css">
+<!-- jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+
+<!-- Latest compiled JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+
+
+<title>Freelancer Platform</title>
 </head>
 <body>
-<div id="root">
-<h1>{{text}}</h1>
-<ul>
-	 
-	<li v-for="item in items">
-		{{item}}
-	</li>
-</ul>
+<div id="root" class="container">
+<h1 class="text-center">Freelancer Platform</h1>
+<div class="row">
+<dropdown class="col-md-12 text-center"></dropdown>
+</div>
+<div class="row">
+<freelancer class="col-md-12"></freelancer>
+</div>
+<router-link to="/">Home</router-link>
 </div>
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vue-router/2.7.0/vue-router.js"></script>
 <script type="text/javascript" src="js/main.js"></script>
 </body>
 </html>
