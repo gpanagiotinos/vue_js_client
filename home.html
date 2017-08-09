@@ -16,6 +16,10 @@
 </head>
 <body>
 <div id="root" class="container">
+<template v-if="$route.name == 'sendemail'">
+<sendemail></sendemail>
+</template>
+<template v-else>
 <h1 class="text-center">Freelancer Platform</h1>
 <div class="row">
 <dropdown class="col-md-12 text-center"></dropdown>
@@ -23,7 +27,7 @@
 <div class="row">
 <freelancer class="col-md-12"></freelancer>
 </div>
-<router-link to="/">Home</router-link>
+</template>
 </div>
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.js"></script>
