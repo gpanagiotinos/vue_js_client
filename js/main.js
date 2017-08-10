@@ -19,7 +19,7 @@ const dropdown = Vue.component('dropdown',{
 	},
 
 	mounted(){
-		axios.post('http://localhost:81/vue_server/web/api/apivone/getjobs').then(response => this.items = response.data.success.data );
+		axios.post('http://localhost/vue_server/web/api/apivone/getjobs').then(response => this.items = response.data.success.data );
 	},
 	methods:{
 		selectJob(job_id){
@@ -55,7 +55,7 @@ const freelancer = Vue.component('freelancer',{
 	},
 	//Mounted method to json post request
 	mounted(){
-		axios.post('http://localhost:81/vue_server/web/api/apivone/getallfreelancers').then(response => this.lancers = response.data.success);
+		axios.post('http://localhost/vue_server/web/api/apivone/getallfreelancers').then(response => this.lancers = response.data.success);
 	},
 			
 	//axios.post(url).then(response => this.lancers = response.data.success.data );
@@ -63,7 +63,7 @@ const freelancer = Vue.component('freelancer',{
 	methods:{
 		findByjobId: function(job_id){
 			
-				var url = 'http://localhost:81/vue_server/web/api/apivone/getfreelancers?id=' + job_id;
+				var url = 'http://localhost/vue_server/web/api/apivone/getfreelancers?id=' + job_id;
 				axios.post(url).then(response=>this.lancers= response.data.success.data);
 
 		},
@@ -115,29 +115,67 @@ const sendemail = Vue.component('sendemail',{
 		<form>
 		<div class="form-group">
     		<label for="firstname">Firstname</label>
-    		<input type="text" class="form-control" id="firstname" placeholder="Firstname" pattern="^.{1,55}$" required>
+    		<input type="text" class="form-control" id="firstname" v-model="email_form.firstname" placeholder="Firstname" pattern="^.{1,55}$" required>
   		</div>
   		<div class="form-group">
     		<label for="lastname">Lastname</label>
-    		<input type="text" class="form-control" id="lastname" placeholder="Lastname" pattern="^.{1,55}$" required>
+    		<input type="text" class="form-control" id="lastname" placeholder="Lastname" v-model="email_form.lastname" pattern="^.{1,55}$" required>
   		</div>
 		<div class="form-group">
 			<label for="recepient">Recepient</label>
-			<input type="email" class="form-control" id="recepient" aria-describedby="emailHelp" placeholder="Enter email" required>
+			<input type="email" class="form-control" id="recepient" aria-describedby="emailHelp" placeholder="Enter email" v-model="email_form.recepient" required>
 			<small id="emailHelp" class="form-text text-muted">We'll never share your email with anyone else.</small>
 		</div>
 		<div class="form-group">
 			<label for="subject">Subject</label>
-    		<input type="text" class="form-control" id="subject" placeholder="Subject" pattern="^.{1,128}$" required>
+    		<input type="text" class="form-control" id="subject" v-model="email_form.subject" placeholder="Subject" pattern="^.{1,128}$" required>
 		</div>
 		<div class="form-group">
 			<label for="message">Message</label>
-			<textarea class="form-control" id="message" rows="3" placeholder="Write some words is free"></textarea pattern="^.{1,1024}$" required>
+			<textarea class="form-control" id="message" v-model="email_form.message" rows="3" placeholder="Write some words is free"></textarea pattern="^.{1,1024}$" required>
+			<small id="messageCount" class="form-text text-muted">{{email_form.message}}</small>
 		</div>
 		<h1>{{$route.params.id}}</h1>
-		<button type="submit" class="btn btn-success">Submit</button>
+		<button type="submit" @click="submit_email" class="btn btn-success">Submit</button>
 	</form>
 	`,
+
+	data(){
+		return {email_form:{}}
+	},
+	methods:{
+		submit_email(){
+			//console.log(this.$route.params.id);
+			//alert(submit_email);
+			this.email_form.freelancer_id = this.$route.params.id;
+			//console.log(this.email_form);
+	
+			
+			axios({
+				method:'post',
+				url:'http://localhost/vue_server/web/api/apivone/sendemail', 
+				data: $.param(this.email_form),
+				headers: {
+					'Content-type': 'application/x-www-form-urlencoded'
+				}
+			})
+			.then(function(response){
+				console.log(response.data)
+			})
+			.catch(function(error){
+				alert(error.message)
+			});
+	
+		}
+	},
+	watch:{
+		'email_form.message':{
+			handler(val, oldval){
+				 console.log(val)
+			},
+			deep: true
+		}
+	},
 });
 
 
