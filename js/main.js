@@ -19,7 +19,7 @@ const dropdown = Vue.component('dropdown',{
 	},
 
 	mounted(){
-		axios.post('http://localhost/vue_server/web/api/apivone/getjobs').then(response => this.items = response.data.success.data );
+		axios.post('http://localhost:81/vue_server/web/api/apivone/getjobs').then(response => this.items = response.data.success.data );
 	},
 	methods:{
 		selectJob(job_id){
@@ -35,8 +35,14 @@ const dropdown = Vue.component('dropdown',{
 const freelancer = Vue.component('freelancer',{
 	template:`
 	<div class="container" style="padding:60px">
-	<h1>{{lancers.message}}</h1>
-		<div class="custom_media media col-md-5" v-for = "lancer in sorted(lancers.data)">
+	<div class="row">
+	<h1 class="col-md-6">{{lancers.message}}</h1>
+	<div class="custom_group btn-group col-md-6" role="group" aria-label="Basic example">
+		<button type="button" class="btn btn-secondary" @click="sorted(lancers.data, 'lastname')">Lastname</button>
+		<button type="button" class="btn btn-secondary" @click="sorted(lancers.data, 'available')">Available</button>
+	</div>
+	</div>
+		<div class="custom_media media col-md-5" v-for = "lancer in sorted(lancers.data, 'lastname')">
 			<div class="media-left">
 				<img :src="lancer.avatar_img" class="d-flex mr-3 img-circle" style="width:60px">
 			</div>
@@ -55,7 +61,7 @@ const freelancer = Vue.component('freelancer',{
 	},
 	//Mounted method to json post request
 	mounted(){
-		axios.post('http://localhost/vue_server/web/api/apivone/getallfreelancers').then(response => this.lancers = response.data.success);
+		axios.post('http://localhost:81/vue_server/web/api/apivone/getallfreelancers').then(response => this.lancers = response.data.success);
 	},
 			
 	//axios.post(url).then(response => this.lancers = response.data.success.data );
@@ -63,8 +69,8 @@ const freelancer = Vue.component('freelancer',{
 	methods:{
 		findByjobId: function(job_id){
 			
-				var url = 'http://localhost/vue_server/web/api/apivone/getfreelancers?id=' + job_id;
-				axios.post(url).then(response=>this.lancers= response.data.success.data);
+				var url = 'http://localhost:81/vue_server/web/api/apivone/getfreelancers?id=' + job_id;
+				axios.post(url).then(response=>this.lancers= response.data.success);
 
 		},
 		availability(available){
@@ -72,34 +78,27 @@ const freelancer = Vue.component('freelancer',{
 			 return attr; 
 
 		},
-
-		sorted(lancers_data){
-			console.log('here');
+		
+		sorted(lancers_data, sort_property){
 			if (typeof lancers_data !== 'undefined'){
-				lancers_data = lancers_data.sort(this.predicateBy("last_name", "available"));
+				lancers_data = lancers_data.sort(this.predicateBy(sort_property));
 			}
 			return lancers_data;
 		},
-		predicateBy(prop1, prop2){
-
-
-			/*sort by 2 props*/
+		predicateBy(prop1){
+		/*sort by 2 props*/
 			return function(a,b){
-			if( a[prop2] < b[prop2]){
-			  return 1;
-			}else if( a[prop2] > b[prop2] ){
-			  return -1;
-			}else if(a[prop2] = b[prop2] ){
-				if( a[prop1] > b[prop1]){
+				if( a[prop1] < b[prop1]){
 				  return 1;
-				}else if( a[prop1] < b[prop1] ){
+				}else if( a[prop1] > b[prop1] ){
 				  return -1;
 				}
+					return 0;
+				}
 			}
-			}
+	
 		},
 
-	},
 
 
 	created(){
@@ -133,15 +132,16 @@ const sendemail = Vue.component('sendemail',{
 		<div class="form-group">
 			<label for="message">Message</label>
 			<textarea class="form-control" id="message" v-model="email_form.message" rows="3" placeholder="Write some words is free"></textarea pattern="^.{1,1024}$" required>
-			<small id="messageCount" class="form-text text-muted">{{email_form.message}}</small>
+			<small id="messageCount" class="form-text text-muted text-right">{{message.length}}/1024</small>
 		</div>
-		<h1>{{$route.params.id}}</h1>
 		<button type="submit" @click="submit_email" class="btn btn-success">Submit</button>
 	</form>
 	`,
 
 	data(){
-		return {email_form:{}}
+		return {email_form:{
+			message: ''
+		}}
 	},
 	methods:{
 		submit_email(){
@@ -153,14 +153,27 @@ const sendemail = Vue.component('sendemail',{
 			
 			axios({
 				method:'post',
-				url:'http://localhost/vue_server/web/api/apivone/sendemail', 
+				url:'http://localhost:81/vue_server/web/api/apivone/sendemail', 
 				data: $.param(this.email_form),
 				headers: {
 					'Content-type': 'application/x-www-form-urlencoded'
 				}
 			})
 			.then(function(response){
-				console.log(response.data)
+				if (response.data.success) {
+				swal(
+					response.data.success.message,
+					'Now you must think how to pay him/her',
+					'success'
+				);
+				router.push('/');
+				}else{
+					swal(
+					response.data.error.message,
+					'Now you must think how to pay him/her',
+					'error'
+				)	
+				}
 			})
 			.catch(function(error){
 				alert(error.message)
@@ -168,14 +181,12 @@ const sendemail = Vue.component('sendemail',{
 	
 		}
 	},
-	watch:{
-		'email_form.message':{
-			handler(val, oldval){
-				 console.log(val)
-			},
-			deep: true
+	computed:{
+		message(){
+			return this.email_form.message;
 		}
 	},
+
 });
 
 

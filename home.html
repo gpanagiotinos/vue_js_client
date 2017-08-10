@@ -4,6 +4,7 @@
 
 	<!-- Latest compiled and minified CSS -->
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css">
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/6.6.7/sweetalert2.css">
 <link rel="stylesheet" type="text/css" href="css/home.css">
 <!-- jQuery library -->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
@@ -17,6 +18,7 @@
 <body>
 <div id="root" class="container">
 <template v-if="$route.name == 'sendemail'">
+<h1 class="text-center">Send Email</h1>
 <sendemail></sendemail>
 </template>
 <template v-else>
@@ -32,6 +34,7 @@
 <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vue/2.4.2/vue.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/vue-router/2.7.0/vue-router.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/limonte-sweetalert2/6.6.7/sweetalert2.js"></script>
 <script type="text/javascript" src="js/main.js"></script>
 </body>
 </html>
