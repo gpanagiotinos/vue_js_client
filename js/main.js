@@ -19,7 +19,7 @@ const dropdown = Vue.component('dropdown',{
 	},
 
 	mounted(){
-		axios.post('http://localhost:81/vue_server/web/api/apivone/getjobs').then(response => this.items = response.data.success.data );
+		axios.post('http://localhost/vue_server/web/api/apivone/getjobs').then(response => this.items = response.data.success.data );
 	},
 	methods:{
 		selectJob(job_id){
@@ -38,18 +38,18 @@ const freelancer = Vue.component('freelancer',{
 	<div class="row">
 	<h1 class="col-md-6">{{lancers.message}}</h1>
 	<div class="custom_group btn-group col-md-6" role="group" aria-label="Basic example">
-		<button type="button" class="btn btn-secondary" @click="sorted(lancers.data, 'lastname')">Lastname</button>
-		<button type="button" class="btn btn-secondary" @click="sorted(lancers.data, 'available')">Available</button>
+		<button type="button" class="btn btn-secondary" @click="sorted(lancers, 'last_name')">Lastname</button>
+		<button type="button" class="btn btn-secondary" @click="sorted(lancers, 'available')">Available</button>
 	</div>
 	</div>
-		<div class="custom_media media col-md-5" v-for = "lancer in sorted(lancers.data, 'lastname')">
+		<div class="custom_media media col-md-5" v-for = "lancer in lancers.data">
 			<div class="media-left">
 				<img :src="lancer.avatar_img" class="d-flex mr-3 img-circle" style="width:60px">
 			</div>
 			<div class="media-body row">
 				<h4 class="media_text media-heading col-md-10">{{lancer.first_name + ' ' + lancer.last_name}}</h4>
 				<h5 class="media_text col-md-9">{{lancer.job_title}}</h5>
-				<router-link :to="{ name: 'sendemail', params: { id: lancer.id }}"><button :disabled="lancer.available == 0" class="btn btn-success col-md-3">HIRE ME</button></router-link>
+				<button :disabled="lancer.available == 0" @click="redirect_toform(lancer.id)" class="btn btn-success col-md-3">HIRE ME</button>
 				<h6 class="media_text col-md-9">{{availability(lancer.available)}}</h6>
 			</div>
 		</div>
@@ -57,11 +57,13 @@ const freelancer = Vue.component('freelancer',{
 	`,
 	//fetch success response to lancers
 	data(){
-		return { lancers:{} }
+		return { lancers:{},
+		sort_order: true }
 	},
 	//Mounted method to json post request
 	mounted(){
-		axios.post('http://localhost:81/vue_server/web/api/apivone/getallfreelancers').then(response => this.lancers = response.data.success);
+		axios.post('http://localhost/vue_server/web/api/apivone/getallfreelancers').then(response => this.lancers = this.sorted(response.data.success, 'last_name'));
+		console.log('mounted');
 	},
 			
 	//axios.post(url).then(response => this.lancers = response.data.success.data );
@@ -69,32 +71,74 @@ const freelancer = Vue.component('freelancer',{
 	methods:{
 		findByjobId: function(job_id){
 			
-				var url = 'http://localhost:81/vue_server/web/api/apivone/getfreelancers?id=' + job_id;
-				axios.post(url).then(response=>this.lancers= response.data.success);
+				var url = 'http://localhost/vue_server/web/api/apivone/getfreelancers?id=' + job_id;
+				axios.post(url).then(response=>this.lancers= this.sorted(response.data.success, 'available'));
+					console.log('findjob');
 
 		},
 		availability(available){
 			 var attr = available == 1 ?  'Available' : 'Unavailable';
 			 return attr; 
+			 	console.log('availability');
 
 		},
 		
 		sorted(lancers_data, sort_property){
-			if (typeof lancers_data !== 'undefined'){
-				lancers_data = lancers_data.sort(this.predicateBy(sort_property));
+			if (typeof lancers_data.data !== 'undefined'){
+				lancers_data.data = lancers_data.data.sort(this.predicateBy(sort_property));
+				this.sort_order = this.sort_order ? false : true;
 			}
 			return lancers_data;
+				console.log('lancers_data');
 		},
 		predicateBy(prop1){
-		/*sort by 2 props*/
-			return function(a,b){
-				if( a[prop1] < b[prop1]){
-				  return 1;
-				}else if( a[prop1] > b[prop1] ){
-				  return -1;
+			
+			
+			/*sort by 2 props*/
+			//this.lancers.sort_order = 1;
+			console.log(this.sort_order);
+			if(this.sort_order){
+				return function(a,b){
+					switch(a[prop1].localeCompare(b[prop1])) {
+						case 1:
+				
+						return 1;
+						break;
+						case -1:
+				
+						return -1;
+						break;
+						default:
+					
+						return 0;
+						break;
+					}
 				}
-					return 0;
+			}else{
+				return function(a,b){
+					switch(a[prop1].localeCompare(b[prop1])) {
+						case 1:
+						return -1;
+						break;
+						case -1:
+
+						return 1;
+						break;
+						default:
+
+						return 0;
+						break;
+					}
 				}
+			}
+
+				  
+			},
+			redirect_toform(id){
+				router.push({
+					name: 'sendemail',
+					params:{id: id}
+				});
 			}
 	
 		},
@@ -102,6 +146,7 @@ const freelancer = Vue.component('freelancer',{
 
 
 	created(){
+			console.log('Event selectJob');
 		Event.$on('find_freelancers', (job_id)=>{this.findByjobId(job_id);});
 	},
 
@@ -153,7 +198,7 @@ const sendemail = Vue.component('sendemail',{
 			
 			axios({
 				method:'post',
-				url:'http://localhost:81/vue_server/web/api/apivone/sendemail', 
+				url:'http://localhost/vue_server/web/api/apivone/sendemail', 
 				data: $.param(this.email_form),
 				headers: {
 					'Content-type': 'application/x-www-form-urlencoded'
@@ -186,6 +231,7 @@ const sendemail = Vue.component('sendemail',{
 			return this.email_form.message;
 		}
 	},
+
 
 });
 
