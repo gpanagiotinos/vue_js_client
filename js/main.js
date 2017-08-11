@@ -3,6 +3,7 @@ window.Event = new Vue()
 
 //component for dropdown menu with jobs_id
 const dropdown = Vue.component('dropdown',{
+
 	template:`
 		<div class="dropdown">
 		<button class="btn btn-primary dropdown-toggle" type="button" data-toggle="dropdown">Select Job
@@ -22,13 +23,12 @@ const dropdown = Vue.component('dropdown',{
 		axios.post('http://localhost/vue_server/web/api/apivone/getjobs').then(response => this.items = response.data.success.data );
 	},
 	methods:{
+		//$emit event to pass id to freelancers component
 		selectJob(job_id){
 			Event.$emit('find_freelancers', job_id);
 		}
 
 	},
-	computed:{
-	}
 });
 
 //component with the personal cards of each freelancer
@@ -55,20 +55,20 @@ const freelancer = Vue.component('freelancer',{
 		</div>
 	</div>
 	`,
-	//fetch success response to lancers
 	data(){
 		return { lancers:{},
+		//use to switch between asc and desc sort order
 		sort_order: true }
 	},
-	//Mounted method to json post request
+	//Mounted method to json post request with sorted method for sorting
 	mounted(){
 		axios.post('http://localhost/vue_server/web/api/apivone/getallfreelancers').then(response => this.lancers = this.sorted(response.data.success, 'last_name'));
 		console.log('mounted');
 	},
 			
-	//axios.post(url).then(response => this.lancers = response.data.success.data );
 
 	methods:{
+		//method to change lancers cards based on job_id 
 		findByjobId: function(job_id){
 			
 				var url = 'http://localhost/vue_server/web/api/apivone/getfreelancers?id=' + job_id;
@@ -76,13 +76,14 @@ const freelancer = Vue.component('freelancer',{
 					console.log('findjob');
 
 		},
+		//check if lancer available is 1 or 0 and return the appropriate text
 		availability(available){
 			 var attr = available == 1 ?  'Available' : 'Unavailable';
 			 return attr; 
 			 	console.log('availability');
 
 		},
-		
+		//method for sorting with the lancers data from axios
 		sorted(lancers_data, sort_property){
 			if (typeof lancers_data.data !== 'undefined'){
 				lancers_data.data = lancers_data.data.sort(this.predicateBy(sort_property));
@@ -91,6 +92,7 @@ const freelancer = Vue.component('freelancer',{
 			return lancers_data;
 				console.log('lancers_data');
 		},
+		//prediacate by the property(prop1) last_name or available
 		predicateBy(prop1){
 			
 			
@@ -134,6 +136,7 @@ const freelancer = Vue.component('freelancer',{
 
 				  
 			},
+			//Redirect to sendemail with id params
 			redirect_toform(id){
 				router.push({
 					name: 'sendemail',
@@ -144,7 +147,7 @@ const freelancer = Vue.component('freelancer',{
 		},
 
 
-
+	//$on event to retrieve the id that dropdown $emit
 	created(){
 			console.log('Event selectJob');
 		Event.$on('find_freelancers', (job_id)=>{this.findByjobId(job_id);});
@@ -189,11 +192,11 @@ const sendemail = Vue.component('sendemail',{
 		}}
 	},
 	methods:{
+		//method to post data to server
 		submit_email(){
-			//console.log(this.$route.params.id);
-			//alert(submit_email);
+			//init the email_form variable freelancer_id with the id of the current lancer
 			this.email_form.freelancer_id = this.$route.params.id;
-			//console.log(this.email_form);
+
 	
 			
 			axios({
@@ -226,6 +229,7 @@ const sendemail = Vue.component('sendemail',{
 	
 		}
 	},
+	//computed, to count the letters that user types in message
 	computed:{
 		message(){
 			return this.email_form.message;
